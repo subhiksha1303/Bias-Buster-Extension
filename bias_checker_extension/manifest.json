@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "BiasChecker",
+    "version": "1.0",
+    "description": "Check and rewrite biased news articles into unbiased ones.",
+    "permissions": ["scripting", "storage", "activeTab"],
+    "host_permissions": ["https://newsapi.org/*", "https://www.google.com/*"],
+    "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+        "16": "icon.png",
+        "48": "icon.png",
+        "128": "icon.png"
+    }
+    },
+    "background": {
+    "service_worker": "background.js"
+    },
+    "content_scripts": [
+    {
+        "matches": [
+                "*://*.ndtv.com/*",
+                "*://*.bbc.com/*",
+                "*://*.reuters.com/*",
+                "*://*.nytimes.com/*",
+                "*://*.theguardian.com/*"
+            ],
+        "js": ["content.js"],
+        "run_at": "document_end"
+    }
+    ]
+}
