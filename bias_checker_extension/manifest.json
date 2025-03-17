@@ -4,7 +4,7 @@
     "version": "1.0",
     "description": "Check and rewrite biased news articles into unbiased ones.",
     "permissions": ["scripting", "storage", "activeTab"],
-    "host_permissions": ["https://newsapi.org/*", "https://www.google.com/*"],
+    "host_permissions": ["https://newsapi.org/*", "https://www.google.com/*", "https://your-render-app.onrender.com/*"],
     "content_security_policy":{
         "extension_pages":"script-src 'self'; object-src 'none';"
     },

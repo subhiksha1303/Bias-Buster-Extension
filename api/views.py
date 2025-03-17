@@ -1,10 +1,14 @@
 import re
 import requests
 import json
+from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from textblob import TextBlob  # For basic sentiment analysis
+
+def home(request):
+    return render(request, "index.html")
 
 def calculate_bias_score(text):
     blob = TextBlob(text)

@@ -1,0 +1,162 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>BiasChecker Web</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        textarea { width: 80%; height: 200px; }
+        button { margin-top: 10px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+
+    <h2>BiasChecker Web</h2>
+    <p>Paste a news article and click "Analyze"</p>
+    
+    <textarea id="newsInput" placeholder="Paste news here..."></textarea><br>
+    <button onclick="analyzeNews()">Analyze</button>
+
+    <h3>Result:</h3>
+    <div id="result"></div>
+
+    <script>
+        function analyzeNews() {
+            let newsText = document.getElementById("newsInput").value;
+            fetch("/api/analyze-news/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({news_text: newsText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+            });
+        }
+    </script>
+
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>BiasChecker Web</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            margin: 50px; 
+            background-color: #f8f9fa;
+        }
+        .container {
+            width: 60%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        textarea { 
+            width: 90%; 
+            height: 150px; 
+            padding: 10px; 
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button { 
+            margin-top: 10px; 
+            padding: 10px 20px; 
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-container {
+            max-height: 300px; /* Scrollable container */
+            overflow-y: auto; 
+            text-align: left;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f1f1f1;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>BiasChecker Web</h2>
+        <p>Paste a news article and click "Analyze" to check for bias.</p>
+        
+        <textarea id="newsInput" placeholder="Paste news here..."></textarea><br>
+        <button onclick="analyzeNews()">Analyze</button>
+
+        <h3>Analysis Result</h3>
+        <div id="result" class="result-container"></div>
+    </div>
+
+    <script>
+        function analyzeNews() {
+            let newsText = document.getElementById("newsInput").value;
+            fetch("/api/analyze-news/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ news_text: newsText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResult(data);
+            });
+        }
+
+        function displayResult(data) {
+            let resultDiv = document.getElementById("result");
+            let displayText = "";
+
+            if (data.status === "real") {
+                displayText += `<p><strong>Bias Score:</strong> ${data.bias_score}/100</p>`;
+                displayText += `<p>✅ This news is real. Here are the objective summary and other perspectives:</p>`;
+                displayText += `<p><strong>Objective Summary:</strong> ${data.objective_summary}</p>`;
+                
+                if (data.perspectives && data.perspectives.length > 0) {
+                    displayText += `<h4>Perspectives from Various Sources</h4><ul>`;
+                    data.perspectives.forEach((perspective, index) => {
+                        displayText += `
+                            <li>
+                                <strong>${index + 1}. ${perspective.source}</strong> (${perspective.sentiment})<br>
+                                "${perspective.title}"<br>
+                                <a href="${perspective.url}" target="_blank">Read More</a>
+                            </li>
+                        `;
+                    });
+                    displayText += `</ul>`;
+                }
+            } else {
+                displayText = `<p>❌ This news seems to be fake. No reliable sources found.</p>`;
+            }
+
+            resultDiv.innerHTML = displayText;
+        }
+
+
+    </script>
+
+</body>
+</html>

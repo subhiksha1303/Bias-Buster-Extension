@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "news_content") {
         console.log("Extracted news text:", message.text);  // Debugging
 
-        fetch("http://127.0.0.1:8000/api/analyze-news/", {
+        fetch("https://your-render-app.onrender.com/api/analyze-news/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
