@@ -1,0 +1,1 @@
+web: gunicorn bias_checker.wsgi --log-file -
