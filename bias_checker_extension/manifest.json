@@ -5,6 +5,9 @@
     "description": "Check and rewrite biased news articles into unbiased ones.",
     "permissions": ["scripting", "storage", "activeTab"],
     "host_permissions": ["https://newsapi.org/*", "https://www.google.com/*"],
+    "content_security_policy":{
+        "extension_pages":"script-src 'self'; object-src 'none';"
+    },
     "action": {
     "default_popup": "popup.html",
     "default_icon": {
