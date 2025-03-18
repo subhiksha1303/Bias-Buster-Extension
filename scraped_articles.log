@@ -1,0 +1,74 @@
+2025-03-17 14:01:07,235 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.
+2025-03-17 14:01:14,754 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.
+2025-03-17 14:02:11,439 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.
+2025-03-17 14:03:15,604 - 🔍 Processing News URL: 
+2025-03-17 14:03:15,606 - 🔍 Processing news from: 
+2025-03-17 14:03:25,354 - 🔍 Processing News URL: 
+2025-03-17 14:03:25,360 - 🔍 Processing news from: 
+2025-03-17 14:08:52,612 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.
+2025-03-17 14:10:44,215 - /Users/subhiksha13/bias_checker/bias_checker/urls.py changed, reloading.
+2025-03-17 14:11:13,382 - Not Found: /
+2025-03-17 14:11:19,501 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:11:20,890 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:11:29,769 - 🔍 Analyzing news from: 
+2025-03-17 14:11:32,968 - 🔍 Found 1 similar articles for: The mutual respect between New Delhi and Beijing is openly
+2025-03-17 14:11:55,888 - 🔍 Analyzing news from: 
+2025-03-17 14:11:56,487 - 🔍 Found 0 similar articles for: A mother and her daughter hunch down by the windows
+2025-03-17 14:12:34,790 - 🔍 Analyzing news from: 
+2025-03-17 14:12:36,560 - 🔍 Found 1 similar articles for: The mutual respect between New Delhi and Beijing is openly
+2025-03-17 14:16:13,794 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.
+2025-03-17 14:16:31,610 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:16:40,851 - 🔍 Analyzing news from: 
+2025-03-17 14:16:42,187 - 🔍 Found 0 similar articles for: A mother and her daughter hunch down by the windows
+2025-03-17 14:17:18,010 - 🔍 Analyzing news from: 
+2025-03-17 14:17:19,445 - 🔍 Found 1 similar articles for: The mutual respect between New Delhi and Beijing is openly
+2025-03-17 14:17:33,476 - 🔍 Analyzing news from: 
+2025-03-17 14:17:34,745 - 🔍 Analyzing news from: 
+2025-03-17 14:17:34,859 - 🔍 Found 0 similar articles for: Ethnic cleansing Videos show Syrian government aligned forces reveling in
+2025-03-17 14:17:35,262 - 🔍 Analyzing news from: 
+2025-03-17 14:17:35,275 - 🔍 Found 0 similar articles for: Ethnic cleansing Videos show Syrian government aligned forces reveling in
+2025-03-17 14:17:35,479 - 🔍 Analyzing news from: 
+2025-03-17 14:17:36,459 - 🔍 Found 0 similar articles for: Ethnic cleansing Videos show Syrian government aligned forces reveling in
+2025-03-17 14:17:36,645 - 🔍 Found 0 similar articles for: Ethnic cleansing Videos show Syrian government aligned forces reveling in
+2025-03-17 14:17:36,820 - Not Found: /
+2025-03-17 14:17:37,744 - Not Found: /
+2025-03-17 14:17:50,827 - 🔍 Analyzing news from: 
+2025-03-17 14:17:50,827 - Bad Request: /api/analyze-news/
+2025-03-17 14:17:56,177 - 🔍 Analyzing news from: 
+2025-03-17 14:17:56,677 - 🔍 Found 0 similar articles for: Police in Uttar Pradesh s Hathras are looking for the
+2025-03-17 14:18:01,827 - 🔍 Analyzing news from: 
+2025-03-17 14:18:03,187 - 🔍 Found 0 similar articles for: Police in Uttar Pradesh s Hathras are looking for the
+2025-03-17 14:50:00,393 - 🔍 Analyzing news from: 
+2025-03-17 14:50:00,771 - 🔍 Analyzing news from: 
+2025-03-17 14:50:03,364 - 🔍 Found 0 similar articles for: Police in Uttar Pradesh s Hathras are looking for the
+2025-03-17 14:50:03,425 - 🔍 Found 0 similar articles for: Police in Uttar Pradesh s Hathras are looking for the
+2025-03-17 14:52:10,846 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.
+2025-03-17 14:53:41,418 - Not Found: /
+2025-03-17 14:53:46,912 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:53:48,341 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:53:52,550 - Bad Request: /api/analyze-news/
+2025-03-17 14:53:52,581 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:58:27,479 - Not Found: /
+2025-03-17 14:58:33,365 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:58:34,779 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:58:38,539 - Bad Request: /api/analyze-news/
+2025-03-17 14:58:38,560 - Method Not Allowed: /api/analyze-news/
+2025-03-17 14:59:06,785 - 🔍 Analyzing news from: https://www.ndtv.com/india-news/rajnish-sharma-hathras-how-an-anonymous-letter-exposed-up-teachers-chilling-abuse-of-students-7943478#pfrom=home-ndtv_topscroll
+2025-03-17 14:59:20,371 - 🔍 Found 0 similar articles for: Police in Uttar Pradesh s Hathras are looking for the
+2025-03-17 15:00:12,093 - 🔍 Analyzing news from: https://edition.cnn.com/2025/03/17/middleeast/syria-massacre-alawite-minority-intl-invs/index.html
+2025-03-17 15:00:17,081 - 🔍 Found 0 similar articles for: A mother and her daughter hunch down by the windows
+2025-03-17 15:05:49,219 - 🔍 Analyzing news from: https://edition.cnn.com/2025/03/17/middleeast/syria-massacre-alawite-minority-intl-invs/index.html
+2025-03-17 15:05:50,154 - 🔍 Found 0 similar articles for: A mother and her daughter hunch down by the windows
+2025-03-17 15:08:59,349 - 🔍 Analyzing news from: https://edition.cnn.com/2025/03/17/middleeast/syria-massacre-alawite-minority-intl-invs/index.html
+2025-03-17 15:09:02,126 - 🔍 Found 0 similar articles for: A mother and her daughter hunch down by the windows
+2025-03-17 15:09:53,081 - 🔍 Analyzing news from: https://edition.cnn.com/2025/03/17/middleeast/syria-massacre-alawite-minority-intl-invs/index.html
+2025-03-17 15:09:54,368 - 🔍 Found 0 similar articles for: A mother and her daughter hunch down by the windows
+2025-03-17 15:17:57,089 - 🔍 Analyzing news from: https://www.ndtv.com/india-news/rajnish-sharma-hathras-how-an-anonymous-letter-exposed-up-teachers-chilling-abuse-of-students-7943478#pfrom=home-ndtv_topscroll
+2025-03-17 15:17:58,827 - 🔍 Found 0 similar articles for: Police in Uttar Pradesh s Hathras are looking for the
+2025-03-17 15:19:06,568 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.
+2025-03-17 15:19:36,413 - 🔍 Analyzing news from: https://edition.cnn.com/2025/03/17/middleeast/syria-massacre-alawite-minority-intl-invs/index.html
+2025-03-17 15:19:37,403 - 🔍 Found 0 similar articles for: A mother and her daughter hunch down by the windows
+2025-03-17 15:19:45,684 - 🔍 Analyzing news from: https://edition.cnn.com/2025/03/17/middleeast/syria-massacre-alawite-minority-intl-invs/index.html
+2025-03-17 15:19:47,129 - 🔍 Found 0 similar articles for: A mother and her daughter hunch down by the windows
+2025-03-17 15:25:31,221 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.
+2025-03-17 15:26:01,192 - /Users/subhiksha13/bias_checker/api/views.py changed, reloading.

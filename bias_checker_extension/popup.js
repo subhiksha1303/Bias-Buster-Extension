@@ -24,4 +24,3 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         document.getElementById("result").innerText = message.result;
     }
 });
-
