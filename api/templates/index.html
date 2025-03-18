@@ -83,7 +83,7 @@
 
             resultDiv.innerHTML = "<p>🔍 Analyzing... Please wait.</p>";
 
-            fetch("https://biasbuster.onrender.com/analyze-news/", {
+            fetch("https://biasbuster-pjrg.onrender.com", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ news_text: newsText })

@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "news_content") {
         console.log("Extracted news text:", message.text);  // Debugging
 
-        fetch("https://biasbuster.onrender.com/analyze-news/", {
+        fetch("https://biasbuster-pjrg.onrender.com", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
