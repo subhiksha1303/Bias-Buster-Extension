@@ -27,7 +27,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", os.getenv("RENDER_EXTERNAL_HOSTNAME", "biasbusterr.onrender.com")]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -56,6 +55,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'bias_checker.urls'
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS"]
+CORS_ALLOW_HEADERS = ["*"]
 
 TEMPLATES = [
     {
