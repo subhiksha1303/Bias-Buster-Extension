@@ -20,6 +20,6 @@ from api.views import analyze_news
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("api.urls")), 
+    path("api/", include("api.urls")),
     path("api/analyze-news/", analyze_news, name="analyze_news"),
 ]
