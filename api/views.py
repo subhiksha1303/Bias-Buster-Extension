@@ -58,7 +58,7 @@ def extract_keywords(text):
     return " ".join(keywords[:8])
 
 def fetch_news_from_newsapi(query):
-    params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "sortBy": "relevancy", "pageSize": 10}
+    params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "sortBy": "relevancy"}
     response = requests.get(NEWS_API_URL, params=params)
 
     if response.status_code != 200:
