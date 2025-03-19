@@ -38,7 +38,7 @@ def calculate_bias_score(text):
     bias_score = round(polarity_score + (bias_count * 5), 2)  # Adjust bias score
     return min(bias_score, 100)  # Cap at 100
 
-NEWS_API_KEY = os.getenv("NEWS_API_KEY")  # Store API key in environment variables
+NEWS_API_KEY = "e242defe23904eee96b22acfb4d1ecee"
 NEWS_API_URL = "https://newsapi.org/v2/everything"
 
 def extract_keywords(text):
@@ -48,7 +48,7 @@ def extract_keywords(text):
     return " ".join(keywords[:8])
 
 def fetch_news_from_newsapi(query):
-    params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "sortBy": "relevancy"}
+    params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "sortBy": "relevancy", "pageSize": 5}
     response = requests.get(NEWS_API_URL, params=params)
     
     if response.status_code != 200:
