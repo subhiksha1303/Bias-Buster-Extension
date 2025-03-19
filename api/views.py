@@ -14,6 +14,10 @@ try:
 except LookupError:
     nltk.download("punkt")
 
+
+def home(request):
+    return render(request, "index.html")
+
 # 🔹 Trusted news sources based on domain names
 TRUSTED_SOURCES = [
     "bbc.com", "cnn.com", "thehindu.com", "ndtv.com",
