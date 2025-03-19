@@ -84,9 +84,12 @@ def generate_objective_summary(text):
     summary = " ".join(sentences[:5])  # Use the first 5 sentences as summary
     return summary
 
-@api_view(["POST"])
+@api_view(["GET","POST"])
 @csrf_exempt
 def analyze_news(request):
+    if request.method == "GET":
+        return render(request, "index.html")
+
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method."}, status=400)
     
