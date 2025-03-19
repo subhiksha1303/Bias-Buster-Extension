@@ -7,69 +7,53 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 import nltk
-from textblob import TextBlob  # For basic sentiment analysis
+from textblob import TextBlob  # For sentiment analysis
 
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
     nltk.download("punkt")
 
-def home(request):
-    return render(request, "index.html")
+# 🔹 Trusted news sources based on domain names
+TRUSTED_SOURCES = [
+    "bbc.com", "cnn.com", "thehindu.com", "ndtv.com",
+    "reuters.com", "theguardian.com", "nytimes.com",
+    "indiatoday.in", "hindustantimes.com", "forbes.com",
+    "bloomberg.com", "wsj.com", "apnews.com", "abcnews.go.com",
+    "foxnews.com", "nbcnews.com", "cbsnews.com", "sky.com",
+]
 
-# Expanded Trusted Sources (More Global Coverage)
-TRUSTED_SOURCES = {
-    "BBC", "CNN", "The Guardian", "Reuters", "The New York Times", "Al Jazeera", 
-    "The Washington Post", "The Hindu", "The Indian Express", "Hindustan Times", 
-    "NDTV", "Times of India", "Economic Times", "Deccan Herald", "Business Standard", 
-    "The Quint", "India Today", "DNA India", "Scroll.in", "The Print", 
-    "The Telegraph India", "Firstpost", "News18", "Financial Express", 
-    "Forbes", "Bloomberg", "Wall Street Journal", "Associated Press", "ABC News",
-    "Fox News", "NBC News", "CBS News", "Sky News", "Le Monde", "Der Spiegel",
-}
-
-def is_trusted_source(source_name):
-    for trusted in TRUSTED_SOURCES:
-        if trusted.lower() in source_name.lower():
-            return True
-    return False
-
-def calculate_bias_score(text):
-    blob = TextBlob(text)
-    polarity_score = (blob.sentiment.polarity + 1) * 50  # Convert to 0-100 scale
-
-    BIAS_WORDS = {"leftist", "right-wing", "propaganda", "agenda", "liberal", "radical", "biased"}
-    NEUTRAL_WORDS = {"report", "analysis", "study", "official", "confirmed"}
-
-    bias_count = sum(word in text.lower() for word in BIAS_WORDS)
-    neutral_count = sum(word in text.lower() for word in NEUTRAL_WORDS)
-
-    # Adjust bias score with a neutral word balance
-    bias_score = round(polarity_score + (bias_count * 5) - (neutral_count * 2), 2)
-    return min(max(bias_score, 0), 100)  # Ensure the score stays between 0-100
+def is_trusted_source(url):
+    """Check if the URL belongs to a trusted source."""
+    from urllib.parse import urlparse
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc.replace("www.", "")
+    return domain in TRUSTED_SOURCES
 
 NEWS_API_KEY = "e242defe23904eee96b22acfb4d1ecee"
 NEWS_API_URL = "https://newsapi.org/v2/everything"
 
 def extract_keywords(text):
+    """Extract important keywords from the news text."""
     words = re.findall(r'\b\w+\b', text)
     stopwords = {"the", "is", "in", "a", "an", "on", "of", "and", "to", "for", "with"}
     keywords = [word for word in words if word.lower() not in stopwords]
     return " ".join(keywords[:8])
 
 def fetch_news_from_newsapi(query):
-    params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "sortBy": "relevancy"}
+    """Fetch news articles from NewsAPI based on query."""
+    params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "sortBy": "relevancy", "pageSize": 10}
     response = requests.get(NEWS_API_URL, params=params)
-
+    
     if response.status_code != 200:
-        return {"status": "error", "message": "NewsAPI request failed. Try again later."}
+        return {"status": "error", "message": "Failed to fetch news from NewsAPI."}
     
     return response.json().get("articles", [])
 
 def analyze_sentiment(text):
+    """Analyze sentiment polarity using TextBlob."""
     blob = TextBlob(text)
     polarity = blob.sentiment.polarity
-
     if polarity > 0.1:
         return "Positive"
     elif polarity < -0.1:
@@ -77,26 +61,29 @@ def analyze_sentiment(text):
     else:
         return "Neutral"
 
-# More refined harsh words filter
+# List of harsh/subjective words to remove
 HARSH_WORDS = {
     "terrible", "horrible", "awful", "disgusting", "amazing", "fantastic", "incredible",
     "hate", "love", "worst", "best", "stupid", "idiot", "brilliant", "perfect"
 }
 
 def remove_harsh_words(text):
+    """Remove harsh words to generate a neutral summary."""
     words = text.split()
     filtered_words = [word for word in words if word.lower() not in HARSH_WORDS]
     return " ".join(filtered_words)
 
 def generate_objective_summary(text):
+    """Create an unbiased summary using the first few sentences."""
     cleaned_text = remove_harsh_words(text)
     sentences = re.split(r'(?<=[.!?]) +', cleaned_text)
-    summary = " ".join(sentences[:5])  
+    summary = " ".join(sentences[:5])  # Take first 5 sentences
     return summary
 
 @api_view(["GET", "POST"])
 @csrf_exempt
 def analyze_news(request):
+    """Analyze news, check legitimacy, summarize, and show other perspectives."""
     if request.method == "GET":
         return render(request, "index.html")
 
@@ -115,36 +102,42 @@ def analyze_news(request):
 
         perspectives = []
         trusted_source_count = 0
+        trusted_articles = []
 
         if articles:
-            for article in articles[:5]:
+            for article in articles[:5]:  
+                source_url = article.get("url", "")
                 source_name = article.get("source", {}).get("name", "Unknown")
-                is_trusted = is_trusted_source(source_name)
+                is_trusted = is_trusted_source(source_url)
 
                 if is_trusted:
                     trusted_source_count += 1
-
-                if article.get("content"):
-                    perspectives.append({
+                    trusted_articles.append({
                         "source": source_name,
                         "title": article.get("title", ""),
-                        "url": article.get("url", ""),
-                        "sentiment": analyze_sentiment(article.get("content", ""))
+                        "url": source_url,
                     })
+
+                perspectives.append({
+                    "source": source_name,
+                    "title": article.get("title", ""),
+                    "url": source_url,
+                    "sentiment": analyze_sentiment(article.get("content", ""))
+                })
 
             # Generate an objective summary
             objective_summary = generate_objective_summary(news_text)
 
-            # Calculate bias score
-            bias_score = calculate_bias_score(news_text)
+            # Determine if the news is legit
+            is_legit = trusted_source_count >= 2  # If at least 2 trusted sources report it, mark as legit
 
-            # Decision logic: If at least **two** trusted sources verify it, it's real
             return JsonResponse({
-                "status": "real" if trusted_source_count >= 1 else "fake",
-                "bias_score": bias_score,
+                "status": "real" if is_legit else "fake",
+                "bias_score": analyze_sentiment(news_text),  
                 "objective_summary": objective_summary,
                 "message": "News verification complete. Perspectives found:",
-                "perspectives": perspectives
+                "trusted_articles": trusted_articles,  # Legit news articles from trusted sources
+                "perspectives": perspectives,  # Other views
             })
 
         return JsonResponse({"status": "fake", "message": "No reliable sources found."})
