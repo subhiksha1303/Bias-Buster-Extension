@@ -132,7 +132,6 @@ protobuf==4.25.5
 psutil==6.1.1
 ptyprocess==0.7.0
 pure_eval==0.2.3
-PyAudio==0.2.14
 pycountry==24.6.1
 pycparser==2.22
 pydantic==2.10.6
