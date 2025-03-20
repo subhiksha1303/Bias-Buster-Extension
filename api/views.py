@@ -1,7 +1,6 @@
 import re
 import requests
 import json
-import os
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
@@ -29,7 +28,7 @@ def is_trusted_source(url):
 
 # ✅ Function to fetch news using Google Custom Search API
 GOOGLE_API_KEY = "AIzaSyD0RJdZ3NtQAI9Y2KqSiTdcfK3a0ulMHf0"  # Store in environment variable
-GOOGLE_CSE_ID = "86f38c27f03df4661" # Store in environment variable
+GOOGLE_CSE_ID = "86f38c27f03df4661"  # Store in environment variable
 def fetch_news_google(query):
     url = f"https://www.googleapis.com/customsearch/v1?q={query}&cx={GOOGLE_CSE_ID}&key={GOOGLE_API_KEY}"
     response = requests.get(url)
@@ -38,7 +37,7 @@ def fetch_news_google(query):
     return response.json().get("items", [])
 
 # ✅ Function to fetch news from NewsAPI
-NEWS_API_KEY = "e242defe23904eee96b22acfb4d1ecee" # Store in environment variable
+NEWS_API_KEY = "e242defe23904eee96b22acfb4d1ecee"  # Store in environment variable
 NEWS_API_URL = "https://newsapi.org/v2/everything"
 def fetch_news_newsapi(query):
     params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "pageSize": 5}
@@ -65,9 +64,12 @@ def generate_summary(text):
     return " ".join(str(sentence) for sentence in summary)
 
 # ✅ Function to analyze news and return unbiased perspectives
-@api_view(["POST"])
+@api_view(["GET", "POST"])
 @csrf_exempt
 def analyze_news(request):
+    if request.method == "GET":
+        return render(request, "templates/index.html")
+    
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid request method."}, status=400)
 
@@ -80,25 +82,26 @@ def analyze_news(request):
 
         keyword_query = extract_keywords(news_text)
         
-        # Fetch news from both APIs
+        # ✅ Fetch news from both APIs
         google_news = fetch_news_google(keyword_query)
         newsapi_news = fetch_news_newsapi(keyword_query)
 
         all_articles = google_news + newsapi_news
         perspectives = []
         trusted_source_found = False
+        most_relevant_article = None
 
         if all_articles:
             for article in all_articles[:5]:  
-                title = article.get("title", "")
+                title = article.get("title", article.get("htmlTitle", ""))
                 url = article.get("link", article.get("url", ""))
                 source_name = article.get("displayLink", article.get("source", {}).get("name", "Unknown"))
-                
+
                 is_trusted = is_trusted_source(url)
                 if is_trusted:
                     trusted_source_found = True
-                
-                # Check if the article is relevant
+
+                # ✅ Check if the article is relevant
                 similarity_score = text_similarity(news_text, title)
                 if similarity_score < 0.5:  # Ignore unrelated articles
                     continue
@@ -109,8 +112,13 @@ def analyze_news(request):
                     "url": url,
                 })
 
-            # Generate unbiased summary
-            objective_summary = generate_summary(news_text)
+                # ✅ Pick the most relevant article for summarization
+                if not most_relevant_article or similarity_score > text_similarity(news_text, most_relevant_article["title"]):
+                    most_relevant_article = {"title": title, "content": article.get("snippet", ""), "url": url}
+
+            # ✅ Generate unbiased summary from the most relevant article
+            summary_input = most_relevant_article["content"] if most_relevant_article else news_text
+            objective_summary = generate_summary(summary_input)
 
             return JsonResponse({
                 "status": "real" if trusted_source_found else "fake",
@@ -118,8 +126,11 @@ def analyze_news(request):
                 "objective_summary": objective_summary,
                 "perspectives": perspectives
             })
-        
+
         return JsonResponse({"status": "fake", "message": "No reliable sources found."})
     
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Invalid JSON input."}, status=400)
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)

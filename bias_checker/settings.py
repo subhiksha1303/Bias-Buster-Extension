@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-(_kz-2_(u3((3k(8hvo_n6kz@nkecaf2&=_sqt9yc$n!s$gm#a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "biasbuster-pjrg.onrender.com"]
 
 # Application definition
 
@@ -53,11 +53,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'bias_checker.urls'
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS"]
+ROOT_URLCONF = "bias_checker.urls"
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000", 
+    "https://biasbuster-pjrg.onrender.com",  
+]
+CORS_ALLOW_CREDENTIALS = True 
+CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS", "PUT", "DELETE"]
 CORS_ALLOW_HEADERS = ["*"]
-CSRF_TRUSTED_ORIGINS = ["https://biasbuster-pjrg.onrender.com"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "https://biasbuster-pjrg.onrender.com",
+]
 
 TEMPLATES = [
     {
@@ -125,6 +134,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR,"staticfiles")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
