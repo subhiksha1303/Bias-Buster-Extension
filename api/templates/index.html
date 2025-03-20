@@ -8,13 +8,9 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-    
-    <!-- Custom Styles -->
     <style>
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #f8f9fa;
         }
         .container {
@@ -32,29 +28,17 @@
             padding: 10px 20px;
             border-radius: 8px;
         }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
         .loading {
             display: none;
             text-align: center;
             margin-top: 20px;
         }
-        .loading img {
-            width: 50px;
-        }
         .result-container {
             display: none;
             margin-top: 20px;
         }
-        .status-real {
-            color: green;
-            font-weight: bold;
-        }
-        .status-fake {
-            color: red;
-            font-weight: bold;
-        }
+        .status-real { color: green; font-weight: bold; }
+        .status-fake { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -70,17 +54,13 @@
             <button id="analyzeButton" class="btn btn-primary">Analyze News</button>
         </div>
         
-        <!-- Loading Animation -->
         <div class="loading" id="loading">
-            <img src="https://i.gifer.com/VAyR.gif" alt="Loading...">
-            <p>Analyzing news...</p>
+            <p>🔄 Analyzing news...</p>
         </div>
         
-        <!-- Results Section -->
         <div class="result-container" id="result">
             <h4 class="mt-4">Analysis Result:</h4>
             <p><strong>Status:</strong> <span id="newsStatus"></span></p>
-            <p><strong>Bias Score:</strong> <span id="biasScore"></span></p>
             <p><strong>Unbiased Summary:</strong></p>
             <p id="unbiasedSummary" class="p-2 bg-light border rounded"></p>
 
@@ -90,10 +70,6 @@
     </div>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- JavaScript Logic -->
 <script>
 document.getElementById("analyzeButton").addEventListener("click", function() {
     let newsText = document.getElementById("newsInput").value;
@@ -105,11 +81,10 @@ document.getElementById("analyzeButton").addEventListener("click", function() {
         return;
     }
 
-    // Show loading animation
     resultDiv.style.display = "none";
     loadingDiv.style.display = "block";
 
-    fetch("https://biasbuster-pjrg.onrender.com", {
+    fetch("/api/analyze-news/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ news_text: newsText })
@@ -123,7 +98,6 @@ document.getElementById("analyzeButton").addEventListener("click", function() {
             ? `<span class="status-real">✅ Legit News</span>` 
             : `<span class="status-fake">❌ Fake News</span>`;
 
-        document.getElementById("biasScore").textContent = data.bias_score + " / 100";
         document.getElementById("unbiasedSummary").textContent = data.unbiased_summary;
 
         let perspectivesList = document.getElementById("perspectivesList");
@@ -147,6 +121,5 @@ document.getElementById("analyzeButton").addEventListener("click", function() {
     });
 });
 </script>
-
 </body>
 </html>
