@@ -1,124 +1,125 @@
-import requests
 import re
+import requests
 import json
+import os
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
-from bs4 import BeautifulSoup  # For web scraping
-from transformers import pipeline  # For AI summarization
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer
+from difflib import SequenceMatcher  # For text similarity checking
 
-# API Keys & Configuration
-GOOGLE_API_KEY = "AIzaSyD0RJdZ3NtQAI9Y2KqSiTdcfK3a0ulMHf0"
-GOOGLE_CSE_ID = "86f38c27f03df4661"
-
+# ✅ Home page function
 def home(request):
     return render(request, "index.html")
 
-# AI Summarization Model
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# ✅ List of trusted news sources (URLs instead of names)
+TRUSTED_SOURCES = {
+    "bbc.com", "cnn.com", "reuters.com", "theguardian.com", "nytimes.com",
+    "aljazeera.com", "washingtonpost.com", "ndtv.com", "indiatoday.in",
+    "timesofindia.indiatimes.com", "business-standard.com", "news18.com",
+    "thehindu.com", "firstpost.com", "scroll.in", "theprint.in"
+}
 
-# Trusted news sources (can be expanded)
-TRUSTED_SOURCES = [
-    "bbc.com", "cnn.com", "reuters.com", "nytimes.com", "theguardian.com", "aljazeera.com",
-    "thehindu.com", "ndtv.com", "indiatoday.in", "hindustantimes.com", "timesofindia.indiatimes.com",
-    "deccanherald.com", "business-standard.com", "news18.com"
-]
+# ✅ Function to check if a source is trusted
+def is_trusted_source(url):
+    return any(source in url for source in TRUSTED_SOURCES)
 
-### 🔹 **Step 1: Fetch News from Google Custom Search API**
+# ✅ Function to fetch news using Google Custom Search API
+GOOGLE_API_KEY = "AIzaSyD0RJdZ3NtQAI9Y2KqSiTdcfK3a0ulMHf0"  # Store in environment variable
+GOOGLE_CSE_ID = "86f38c27f03df4661" # Store in environment variable
 def fetch_news_google(query):
-    """Fetch news articles from Google Custom Search API."""
-    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={GOOGLE_API_KEY}&cx={GOOGLE_CSE_ID}"
+    url = f"https://www.googleapis.com/customsearch/v1?q={query}&cx={GOOGLE_CSE_ID}&key={GOOGLE_API_KEY}"
     response = requests.get(url)
     if response.status_code != 200:
         return []
-    
-    articles = response.json().get("items", [])
-    return [
-        {
-            "source": article.get("displayLink"),
-            "title": article.get("title"),
-            "url": article.get("link"),
-            "snippet": article.get("snippet")
-        }
-        for article in articles
-    ]
+    return response.json().get("items", [])
 
-### 🔹 **Step 2: Web Scraping for Additional News Sources**
-def scrape_article(url):
-    """Scrape article content from the URL."""
-    try:
-        response = requests.get(url, timeout=5)
-        if response.status_code != 200:
-            return None
-        
-        soup = BeautifulSoup(response.text, "html.parser")
-        paragraphs = soup.find_all("p")
-        content = " ".join([p.text for p in paragraphs])
-        return content if len(content) > 100 else None  # Ignore very short articles
-    except:
-        return None
+# ✅ Function to fetch news from NewsAPI
+NEWS_API_KEY = "e242defe23904eee96b22acfb4d1ecee" # Store in environment variable
+NEWS_API_URL = "https://newsapi.org/v2/everything"
+def fetch_news_newsapi(query):
+    params = {"q": query, "apiKey": NEWS_API_KEY, "language": "en", "pageSize": 5}
+    response = requests.get(NEWS_API_URL, params=params)
+    if response.status_code != 200:
+        return []
+    return response.json().get("articles", [])
 
-### 🔹 **Step 3: Text Similarity Matching**
-def is_similar(text1, text2):
-    """Simple text similarity check using common words overlap."""
-    words1, words2 = set(text1.lower().split()), set(text2.lower().split())
-    overlap = words1.intersection(words2)
-    return len(overlap) / min(len(words1), len(words2)) > 0.3  # 30% similarity threshold
+# ✅ Function to clean text and extract keywords
+def extract_keywords(text):
+    words = re.findall(r'\b\w+\b', text.lower())
+    stopwords = {"the", "is", "in", "a", "an", "on", "of", "and", "to", "for", "with"}
+    return " ".join([word for word in words if word not in stopwords][:8])
 
-### 🔹 **Step 4: AI-based Summarization**
+# ✅ Function to check similarity between texts
+def text_similarity(text1, text2):
+    return SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
+
+# ✅ Function to generate unbiased summary using `sumy`
 def generate_summary(text):
-    """Generate an unbiased AI summary using Hugging Face models."""
-    summary = summarizer(text, max_length=150, min_length=50, do_sample=False)
-    return summary[0]["summary_text"]
+    parser = PlaintextParser.from_string(text, Tokenizer("english"))
+    summarizer = LsaSummarizer()
+    summary = summarizer(parser.document, 3)  # 3 sentences
+    return " ".join(str(sentence) for sentence in summary)
 
+# ✅ Function to analyze news and return unbiased perspectives
 @api_view(["POST"])
 @csrf_exempt
 def analyze_news(request):
-    """Main function to analyze news and determine legitimacy."""
     if request.method != "POST":
-        return JsonResponse({"error": "Invalid request method"}, status=400)
-    
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=400)
+
     try:
         data = json.loads(request.body)
         news_text = data.get("news_text", "").strip()
-        
+
         if not news_text:
-            return JsonResponse({"error": "News text is required"}, status=400)
+            return JsonResponse({"status": "error", "message": "News text is required."}, status=400)
+
+        keyword_query = extract_keywords(news_text)
         
-        # Step 1: Fetch news from APIs
-        articles = fetch_news_google(news_text)
+        # Fetch news from both APIs
+        google_news = fetch_news_google(keyword_query)
+        newsapi_news = fetch_news_newsapi(keyword_query)
 
-        # Step 2: Check if articles are from trusted sources
-        trusted_articles = [article for article in articles if any(src in article["source"] for src in TRUSTED_SOURCES)]
+        all_articles = google_news + newsapi_news
+        perspectives = []
+        trusted_source_found = False
 
-        # Step 3: Scrape content & verify similarity
-        final_articles = []
-        for article in trusted_articles:
-            scraped_content = scrape_article(article["url"])
-            if scraped_content and is_similar(scraped_content, news_text):
-                final_articles.append(article)
+        if all_articles:
+            for article in all_articles[:5]:  
+                title = article.get("title", "")
+                url = article.get("link", article.get("url", ""))
+                source_name = article.get("displayLink", article.get("source", {}).get("name", "Unknown"))
+                
+                is_trusted = is_trusted_source(url)
+                if is_trusted:
+                    trusted_source_found = True
+                
+                # Check if the article is relevant
+                similarity_score = text_similarity(news_text, title)
+                if similarity_score < 0.5:  # Ignore unrelated articles
+                    continue
 
-        # Step 4: Generate AI unbiased summary
-        if final_articles:
-            combined_text = " ".join([scrape_article(article["url"]) for article in final_articles if scrape_article(article["url"])])
-            unbiased_summary = generate_summary(combined_text) if combined_text else "Summary not available"
-            
+                perspectives.append({
+                    "source": source_name,
+                    "title": title,
+                    "url": url,
+                })
+
+            # Generate unbiased summary
+            objective_summary = generate_summary(news_text)
+
             return JsonResponse({
-                "status": "real",
-                "message": "Verified news from trusted sources",
-                "bias_score": 0,  # Assume trusted sources have low bias
-                "unbiased_summary": unbiased_summary,
-                "perspectives": final_articles
+                "status": "real" if trusted_source_found else "fake",
+                "message": "News verified. Here are different perspectives:",
+                "objective_summary": objective_summary,
+                "perspectives": perspectives
             })
-        else:
-            return JsonResponse({
-                "status": "fake",
-                "message": "No verified sources found",
-                "bias_score": 100,
-                "unbiased_summary": "N/A",
-                "perspectives": []
-            })
+        
+        return JsonResponse({"status": "fake", "message": "No reliable sources found."})
     
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON input"}, status=400)
+        return JsonResponse({"status": "error", "message": "Invalid JSON input."}, status=400)
