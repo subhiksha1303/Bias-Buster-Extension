@@ -57,6 +57,7 @@ ROOT_URLCONF = 'bias_checker.urls'
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS"]
 CORS_ALLOW_HEADERS = ["*"]
+CSRF_TRUSTED_ORIGINS = ["https://biasbuster-pjrg.onrender.com"]
 
 TEMPLATES = [
     {
