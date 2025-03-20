@@ -21,3 +21,5 @@ PyMySQL==1.1.1
 # Optional (Keep only if needed)
 gunicorn==23.0.0   # For running Django on Render
 selenium==4.27.1   # Keep only if using Selenium for web scraping
+
+numpy
