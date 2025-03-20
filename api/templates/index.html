@@ -109,7 +109,7 @@ document.getElementById("analyzeButton").addEventListener("click", function() {
     resultDiv.style.display = "none";
     loadingDiv.style.display = "block";
 
-    fetch("https://biasbuster-pjrg.onrender.com/api/analyze-news/", {
+    fetch("https://biasbuster-pjrg.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ news_text: newsText })
