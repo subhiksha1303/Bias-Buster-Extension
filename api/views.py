@@ -10,6 +10,7 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
 from difflib import SequenceMatcher  # For text similarity checking
 import nltk
+from bs4 import BeautifulSoup
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -25,6 +26,37 @@ except LookupError:
 def home(request):
     return render(request, "index.html")
 
+def dashboard(request):
+    return render(request, 'home.html')  # Dashboard Page
+
+def about(request):
+    return render(request, 'about.html')
+
+def extract_news_from_url(url):
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+        response = requests.get(url, headers=headers, timeout=5)
+        
+        if response.status_code != 200:
+            return None, f"Error fetching URL: HTTP {response.status_code}"
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # Extract text from <p> tags inside article sections
+        paragraphs = soup.find_all("p")
+        article_text = " ".join([p.get_text() for p in paragraphs if len(p.get_text()) > 30])
+
+        if not article_text:
+            return None, "No readable content found in the article."
+
+        return article_text.strip(), None
+    except requests.exceptions.RequestException as e:
+        return None, f"Request failed: {str(e)}"
+    except Exception as e:
+        return None, f"Unexpected error: {str(e)}"
+    
 # ✅ List of Trusted News Sources (Based on URL Domains)
 TRUSTED_SOURCES = {
     "bbc.com", "cnn.com", "reuters.com", "theguardian.com", "nytimes.com",
@@ -77,12 +109,19 @@ def generate_summary(text):
     return " ".join(str(sentence) for sentence in summary)
 
 #✅ API Endpoint for News Analysis
-@api_view(["POST"])
+@api_view(["POST","GET"])
 @csrf_exempt
 def analyze_news(request):
     try:
         data = json.loads(request.body)
         news_text = data.get("news_text", "").strip()
+        news_url = data.get("news_url", "").strip()
+
+        if news_url:
+            extracted_text, error = extract_news_from_url(news_url)
+            if error:
+                return JsonResponse({"status": "error", "message": error}, status=400)
+            news_text = extracted_text 
 
         if not news_text:
             return JsonResponse({"status": "error", "message": "News text is required."}, status=400)
