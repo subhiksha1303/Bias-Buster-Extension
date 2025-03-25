@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "Bias Buster Extension",
+    "version": "1.0",
+    "description": "Analyze news articles for bias directly from your browser.",
+    "permissions": ["activeTab", "scripting"],
+    "host_permissions": ["http://127.0.0.1:8000/*","https://biasbuster-pjrg.onrender.com/*"],  
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": "icon.png"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"],
+        "run_at": "document_end"
+      }
+    ]
+  }
+  
