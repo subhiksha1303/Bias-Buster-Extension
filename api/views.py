@@ -62,7 +62,9 @@ TRUSTED_SOURCES = {
     "bbc.com", "cnn.com", "reuters.com", "theguardian.com", "nytimes.com",
     "aljazeera.com", "washingtonpost.com", "ndtv.com", "indiatoday.in",
     "timesofindia.indiatimes.com", "business-standard.com", "news18.com",
-    "thehindu.com", "firstpost.com", "scroll.in", "theprint.in"
+    "thehindu.com", "firstpost.com", "scroll.in", "theprint.in",  "nbcnews.com"
+    "abcnews.go.com", "wsj.com", "apnews.com", "cbsnews.com", "foxnews.com",
+    "usatoday.com", "latimes.com", "bloomberg.com", "politico.com", "bostonglobe.com"
 }
 
 # ✅ Function to Check if a News Source is Trusted
