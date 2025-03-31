@@ -110,6 +110,43 @@ def generate_summary(text):
     summary = summarizer(parser.document, 3)  # Generate a summary with 3 sentences
     return " ".join(str(sentence) for sentence in summary)
 
+import requests
+from bs4 import BeautifulSoup
+
+def fetch_other_perspectives(query):
+    search_url = f"https://newsapi.org/v2/everything?q={query}&language=en&apiKey=YOUR_NEWSAPI_KEY"
+    response = requests.get(search_url)
+    articles = response.json().get("articles", [])
+    
+    other_perspectives = []
+    
+    for article in articles[:5]:  # Fetch up to 5 articles
+        article_data = {
+            "title": article.get("title", "No title available"),
+            "published_at": article.get("publishedAt", "Unknown date"),
+            "content": article.get("content", "No content available"),
+            "source": article.get("source", {}).get("name", "Unknown source")
+        }
+        other_perspectives.append(article_data)
+    
+    return other_perspectives
+
+def display_other_perspectives(other_perspectives):
+    html_content = "<div class='other-perspectives'>"
+    for article in other_perspectives:
+        html_content += f"""
+        <div class='perspective-box'>
+            <h3>{article['title']}</h3>
+            <p><strong>Source:</strong> {article['source']}</p>
+            <p><strong>Published At:</strong> {article['published_at']}</p>
+            <p>{article['content']}</p>
+        </div>
+        """
+    html_content += "</div>"
+    return html_content
+
+# [Previous imports remain exactly the same...]
+
 #✅ API Endpoint for News Analysis
 @api_view(["POST","GET"])
 @csrf_exempt
@@ -139,38 +176,62 @@ def analyze_news(request):
         trusted_source_found = False
 
         if all_articles:
-            for article in all_articles[:5]:  
-                title = article.get("title", "")
-                url = article.get("link", article.get("url", ""))
-                source_name = article.get("displayLink", article.get("source", {}).get("name", "Unknown"))
-                
-                is_trusted = is_trusted_source(url)
-                if is_trusted:
-                    trusted_source_found = True
-                
-                # Check if the article is relevant
-                similarity_score = text_similarity(news_text, title)
-                if similarity_score < 0.5:  # Ignore unrelated articles
-                    continue
+            for article in all_articles[:5]:  # Limit to 5 perspectives
+                try:
+                    title = article.get("title", "")
+                    url = article.get("link", article.get("url", ""))
+                    if not url:
+                        continue
+                        
+                    source_name = article.get("displayLink", "") or \
+                                article.get("source", {}).get("name", "Unknown")
+                    
+                    # Extract full article content
+                    extracted_content, _ = extract_news_from_url(url)
+                    if not extracted_content:
+                        continue
+                    
+                    # Check relevance (lowered threshold to 0.3 for better matching)
+                    similarity_score = text_similarity(news_text, title)
+                    if similarity_score < 0.3:
+                        continue
 
-                perspectives.append({
-                    "source": source_name,
-                    "title": title,
-                    "url": url,
-                })
+                    # Check if source is trusted
+                    is_trusted = is_trusted_source(url)
+                    if is_trusted:
+                        trusted_source_found = True
+
+                    perspectives.append({
+                        "source": source_name,
+                        "title": title,
+                        "url": url,
+                        "published_at": article.get("publishedAt", ""),
+                        "content": extracted_content[:1000] + "..." if len(extracted_content) > 1000 else extracted_content
+                    })
+                    
+                except Exception as e:
+                    print(f"Error processing article: {str(e)}")
+                    continue
 
             # Generate unbiased summary
             objective_summary = generate_summary(news_text)
 
             return JsonResponse({
                 "status": "real" if trusted_source_found else "fake",
-                "message": "News verified. Here are different perspectives:",
+                "message": "Analysis complete",
                 "unbiased_summary": objective_summary,
                 "perspectives": perspectives
             })
         
-        return JsonResponse({"status": "fake", "message": "No reliable sources found."})
+        return JsonResponse({
+            "status": "fake", 
+            "message": "No related articles found.",
+            "unbiased_summary": generate_summary(news_text),
+            "perspectives": []
+        })
     
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Invalid JSON input."}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": f"Server error: {str(e)}"}, status=500)
 
