@@ -2,375 +2,527 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bias Buster - News Analyzer</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Bias Analysis</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* Dark Mode is Default */
+        :root {
+            --bg-color: #121212;
+            --text-color: #f0f0f0;
+            --container-bg: #1e1e1e;
+            --shadow-color: rgba(0, 123, 255, 0.6);
+            --button-bg: #007bff; 
+            --button-hover-bg: #0056b3;
+            --textarea-bg: #2b2b2b; 
+            --textarea-border: #444;
+            --textarea-text: #fff;
+            --toggle-active: #0056b3;
+            --toggle-inactive: #2b2b2b;
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            overflow-x: hidden;
-            text-align: center;
-            overflow-y: auto;
-        }
-        .container {
-            max-width: 1000px;
-            margin-top: 30px;
-            animation: fadeIn 1s ease-in-out;
-        }
-        .card {
-            background: #1e1e1e;
-            border-radius: 12px;
-            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.3);
-            border: none;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            padding: 25px;
-        }
-        .card:hover {
-            transform: scale(1.02);
-            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.5);
-        }
-        .form-control {
-            border-radius: 8px;
-            border: none;
-            background: #252525;
-            color: #ffffff;
-        }
-        .form-control::placeholder {
-            color: #bbbbbb;
-        }
-        .form-control:focus {
-            box-shadow: none !important; 
-            background: #252525; 
-            color: #ffffff; 
-            border: none;
-            outline: none;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s ease-in-out;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-top: 5px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: auto;
-        }
-        .result-container {
-            display: none;
-            margin-top: 20px;
-            padding: 25px;
-            background: #252525; 
-            color: #ffffff; 
-            border-radius: 12px;
-            box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.5);
-            overflow-y: auto;
-        }
-        .status-real { 
-            color: #4CAF50; 
-            font-weight: bold; 
-        }
-        .status-fake { 
-            color: #F44336; 
-            font-weight: bold; 
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
         }
 
-        /* Perspectives Grid */
-        .perspectives-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
-        }
-        .perspective-card {
-            background: #1e1e1e;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        .perspective-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 123, 255, 0.3);
-        }
-        .perspective-title {
-            color: #007bff;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        .perspective-source {
-            display: flex;
-            align-items: center;
-            color: #bbbbbb;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-        .perspective-date {
-            color: #888;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-        }
-        .perspective-content {
-            color: #e0e0e0;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            flex-grow: 1;
-            overflow: hidden;
-            position: relative;
-            max-height: 200px;
-        }
-        .perspective-content:after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: linear-gradient(to bottom, transparent, #1e1e1e);
-        }
-        .read-more {
-            color: #4fc3f7;
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            display: inline-block;
-            transition: color 0.2s;
-        }
-        .read-more:hover {
-            color: #007bff;
-            text-decoration: underline;
-        }
-        .source-icon {
-            margin-right: 6px;
-            color: #007bff;
-        }
-
-        /* Nav Buttons */
         .nav-buttons {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-top: 30px;
-            margin-bottom: 30px;
+            margin-top: 40px;
+            margin-bottom: 20px;
         }
-        .nav-buttons button {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: #ffffff;
-            padding: 12px 18px;
+
+        .nav-buttons button, #analyzeButton {
+            background: var(--button-bg);
+            color: white;
+            padding: 14px 20px;
             border: none;
             border-radius: 10px;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease-in-out;
-            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.6);
-        }
-        .nav-buttons button:hover {
-            transform: scale(1.08);
-            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.8); 
+            box-shadow: 0px 4px 10px var(--shadow-color);
+            width: 200px;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                width: 95%;
-                padding: 10px;
-            }
-            .nav-buttons {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-            .perspectives-grid {
-                grid-template-columns: 1fr;
-            }
+        .nav-buttons button:hover, #analyzeButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 6px 15px var(--shadow-color);
+            background: var(--button-hover-bg);
         }
 
-        /* Animations */
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Toggle Switch Style */
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background: var(--toggle-inactive);
+            border-radius: 30px;
+            padding: 5px;
+            width: 300px;
+            margin: 20px auto;
+        }
+
+        .toggle-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .toggle-option.active {
+            background: var(--toggle-active);
+            box-shadow: 0 2px 10px rgba(0, 123, 255, 0.4);
+        }
+
+        /* Input Fields */
+        .input-container {
+            display: none;
+            margin: 20px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .article-content p, 
+        .unbiased-version p,
+        .perspective-box .content {
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        /* Content limiter styles */
+        .content-limiter {
+            position: relative;
+        }
+        .content-limiter::after {
+            content: "";
+            display: block;
+            height: 10px;
+            background: transparent;
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        textarea, input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--textarea-border);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            background: var(--textarea-bg);
+            color: var(--textarea-text);
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        /* Results Section */
+        #result {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .status-card {
+            background: rgba(0, 123, 255, 0.1);
+            border-left: 4px solid var(--button-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .gauge {
+            height: 10px;
+            background: #2b2b2b;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .gauge-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #007bff);
+            transition: width 0.5s ease;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .article-box {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: left;
+            border: 1px solid #333;
+        }
+
+        .article-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: var(--button-bg);
+        }
+
+        .article-box h3 {
+            margin-top: 0;
+            color: var(--button-bg);
+            font-size: 1.2rem;
+        }
+
+        .article-content, .unbiased-version {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .article-content p, .unbiased-version p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Loading Indicator */
+        #loading {
+            display: none;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 123, 255, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid var(--button-bg);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .nav-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-buttons button, #analyzeButton {
+                width: 100%;
+            }
+            
+            .toggle-container {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="nav-buttons">
-    <button onclick="location.href='/api/dashboard/'"><i class="fas fa-home"></i> Dashboard</button>
-    <button onclick="location.href='/'"><i class="fas fa-chart-bar"></i> Analyze</button>
-    <button onclick="location.href='/api/about/'"><i class="fas fa-info-circle"></i> About</button>
-</div>
+    <div class="nav-buttons">
+        <button onclick="location.href='/api/dashboard/'"><i class="fas fa-home"></i> Dashboard</button>
+        <button onclick="location.href='/'"><i class="fas fa-chart-bar"></i> Analyze</button>
+        <button onclick="location.href='/api/about/'"><i class="fas fa-info-circle"></i> About</button>
+    </div>
 
-<div class="container">
-    <h2 class="text-center fw-bold mb-4"><i class="fas fa-newspaper"></i> Bias Buster - News Analyzer</h2>
-
-    <div class="card">
-        <div class="mb-4">
-            <label for="newsInput" class="fw-bold text-white mb-2"><i class="fas fa-align-left"></i> Paste the news headline or text:</label>
-            <textarea id="newsInput" class="form-control mt-2" rows="4" placeholder="Enter the news text here..."></textarea>
-        </div>
-
-        <div class="mb-4">
-            <label for="newsUrl" class="fw-bold text-white mb-2"><i class="fas fa-link"></i> Or enter a news article URL:</label>
-            <input type="text" id="newsUrl" class="form-control mt-2" placeholder="Enter news article URL...">
-        </div>
-
-        <div class="text-center mt-3">
-            <button id="analyzeButton" class="btn btn-primary"><i class="fas fa-search"></i> Analyze News</button>
-        </div>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p class="text-white mt-2">Analyzing news content...</p>
-        </div>
-
-        <div class="result-container" id="result">
-            <h4 class="text-white mb-4"><i class="fas fa-chart-pie"></i> Analysis Result:</h4>
-            
-            <div class="result-item mb-3">
-                <p class="mb-1"><strong>Status:</strong> <span id="newsStatus"></span></p>
-                <div class="status-details" id="statusDetails"></div>
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 10px;"><i class="fas fa-newspaper"></i> Bias Buster - News Analyzer</h2>
+        <p style="text-align: center; color: #aaa; margin-bottom: 30px;">Get unbiased analysis of news articles</p>
+        
+        <!-- Toggle Switch -->
+        <div class="toggle-container">
+            <div class="toggle-option active" id="textToggle" onclick="toggleInput('text')">
+                <i class="fas fa-align-left"></i> Text Input
             </div>
-            
-            <div class="result-item mb-4">
-                <p class="mb-2"><strong><i class="fas fa-file-alt"></i> Unbiased Summary:</strong></p>
-                <div id="unbiasedSummary" class="p-3 bg-dark rounded text-white summary-content"></div>
+            <div class="toggle-option" id="urlToggle" onclick="toggleInput('url')">
+                <i class="fas fa-link"></i> URL Input
+            </div>
+        </div>
+
+        <form id="newsForm">
+            <div id="textInputContainer" class="input-container" style="display: block;">
+                <label for="newsText">Enter News Text:</label>
+                <textarea id="newsText" rows="6" placeholder="Paste your news article text here..."></textarea>
+            </div>
+        
+            <div id="urlInputContainer" class="input-container">
+                <label for="newsUrl">Enter News URL:</label>
+                <input type="text" id="newsUrl" placeholder="https://example.com/news-article" />
+            </div>
+        
+            <button type="submit" id="analyzeButton" style="margin-top: 20px;">
+                <i class="fas fa-search"></i> Analyze News
+            </button>
+        </form>        
+
+        <!-- Loading Indicator -->
+        <div id="loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <div id="result">
+            <div class="status-card">
+                <i class="fas fa-info-circle" style="font-size: 24px;"></i>
+                <div>
+                    <p style="margin: 0 0 5px 0;"><strong>Status:</strong> <span id="newsStatus"></span></p>
+                    <div class="gauge">
+                        <div class="gauge-fill" id="gaugeFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-section">
+                <h2><i class="fas fa-file-alt"></i> Unbiased Article</h2>
+                <div class="article-content">
+                    <p id="unbiasedSummary"></p>
+                </div>
             </div>
             
             <div class="perspectives-section">
-                <h5 class="text-white mb-3"><i class="fas fa-binoculars"></i> Different Perspectives from Trusted Sources:</h5>
-                <div id="perspectivesContainer" class="perspectives-grid"></div>
+                <h2><i class="fas fa-binoculars"></i> Other Perspectives</h2>
+                <div id="perspectivesContainer" class="grid-container"></div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.getElementById("analyzeButton").addEventListener("click", function() {
-    let newsText = document.getElementById("newsInput").value.trim();
-    let newsUrl = document.getElementById("newsUrl").value.trim();
-    let resultDiv = document.getElementById("result");
-    let loadingDiv = document.getElementById("loading");
-    let perspectivesContainer = document.getElementById("perspectivesContainer");
+    <script>
+        // Toggle between text and URL input
+        function toggleInput(type) {
+            const textInput = document.getElementById("textInputContainer");
+            const urlInput = document.getElementById("urlInputContainer");
+            const textToggle = document.getElementById("textToggle");
+            const urlToggle = document.getElementById("urlToggle");
 
-    if (!newsText && !newsUrl) {
-        alert("Please enter either news text or a URL.");
-        return;
-    }
-
-    resultDiv.style.display = "none";
-    loadingDiv.style.display = "block";
-    perspectivesContainer.innerHTML = "";
-
-    fetch("/api/analyze-news/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ news_text: newsText, news_url: newsUrl })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        loadingDiv.style.display = "none";
-        resultDiv.style.display = "block";
-
-        // Set status with icon
-        const statusElement = document.getElementById("newsStatus");
-        if (data.status === "real") {
-            statusElement.innerHTML = `<span class="status-real"><i class="fas fa-check-circle"></i> Legitimate News</span>`;
-            document.getElementById("statusDetails").innerHTML = 
-                `<p class="text-success"><i class="fas fa-thumbs-up"></i> This news appears to be from reputable sources.</p>`;
-        } else {
-            statusElement.innerHTML = `<span class="status-fake"><i class="fas fa-exclamation-triangle"></i> Potentially Biased/Fake</span>`;
-            document.getElementById("statusDetails").innerHTML = 
-                `<p class="text-warning"><i class="fas fa-exclamation-circle"></i> Caution: No reputable sources found for this news.</p>`;
+            if (type === "text") {
+                textInput.style.display = "block";
+                urlInput.style.display = "none";
+                textToggle.classList.add("active");
+                urlToggle.classList.remove("active");
+            } else {
+                textInput.style.display = "none";
+                urlInput.style.display = "block";
+                textToggle.classList.remove("active");
+                urlToggle.classList.add("active");
+            }
         }
 
-        // Set summary
-        document.getElementById("unbiasedSummary").textContent = data.unbiased_summary || "No summary available.";
+        document.getElementById("newsForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            // Determine which input is active
+            const textInputActive = document.getElementById("textInputContainer").style.display !== "none";
+            const newsText = document.getElementById("newsText").value.trim();
+            const newsUrl = document.getElementById("newsUrl").value.trim();
+            const analyzeButton = document.getElementById("analyzeButton");
+            const loadingDiv = document.getElementById("loading");
+            const resultDiv = document.getElementById("result");
 
-        // Display perspectives
-        if (data.perspectives && data.perspectives.length > 0) {
-            data.perspectives.forEach(article => {
-                const card = document.createElement("div");
-                card.className = "perspective-card";
-                card.innerHTML = `
-                    <h5 class="perspective-title">${article.title || "No title available"}</h5>
-                    <div class="perspective-source">
-                        <i class="fas fa-newspaper source-icon"></i>
-                        ${article.source || "Unknown source"}
-                    </div>
-                    <div class="perspective-date">
-                        <i class="far fa-clock"></i> ${article.published_at || "Publication date not available"}
-                    </div>
-                    <div class="perspective-content">
-                        ${article.content || "No content available."}
-                    </div>
-                    <a href="${article.url || '#'}" target="_blank" class="read-more">
-                        <i class="fas fa-external-link-alt"></i> Read full article
-                    </a>
-                `;
-                perspectivesContainer.appendChild(card);
-            });
-        } else {
-            perspectivesContainer.innerHTML = `
-                <div class="col-12">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> No other perspectives available from trusted sources.
-                    </div>
+            // Clear previous results
+            resultDiv.style.display = "none";
+
+            let requestData = {};
+            
+            if (textInputActive) {
+                if (!newsText) {
+                    alert("Please enter news text.");
+                    return;
+                }
+                requestData.news_text = newsText;
+            } else {
+                if (!newsUrl) {
+                    alert("Please enter a news URL.");
+                    return;
+                }
+                if (!isValidUrl(newsUrl)) {
+                    alert("Please enter a valid URL starting with http:// or https://");
+                    return;
+                }
+                requestData.news_url = newsUrl;
+            }
+
+            // Show loading and disable button
+            loadingDiv.style.display = "block";
+            analyzeButton.disabled = true;
+            analyzeButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzing...`;
+
+            fetch("/api/analyze-news/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingDiv.style.display = "none";
+                analyzeButton.disabled = false;
+                analyzeButton.innerHTML = `<i class="fas fa-search"></i> Analyze News`;
+                resultDiv.style.display = "block";
+                
+                // Status display
+                const statusElement = document.getElementById("newsStatus");
+                if (data.status === "real") {
+                    statusElement.innerHTML = `<span style="color: lightgreen;">✅ Legit News</span>`;
+                } else {
+                    statusElement.innerHTML = `<span style="color: #ff6b6b;">❌ Potential Bias Detected</span>`;
+                }
+                
+                // Gauge visualization
+                const gaugeFill = document.getElementById("gaugeFill");
+                if (gaugeFill) {
+                    gaugeFill.style.width = `${data.legitimacy_score}%`;
+                    gaugeFill.style.background = data.legitimacy_score > 75 ? "linear-gradient(90deg, #28a745, #5cb85c)" :
+                                              data.legitimacy_score > 50 ? "linear-gradient(90deg, #5cb85c, #ffc107)" :
+                                              data.legitimacy_score > 25 ? "linear-gradient(90deg, #ffc107, #fd7e14)" :
+                                              "linear-gradient(90deg, #fd7e14, #dc3545)";
+                }
+                
+                // Unbiased summary
+                document.getElementById("unbiasedSummary").innerText = data.unbiased_summary || "No summary available";
+                
+                // Perspectives
+                const container = document.getElementById("perspectivesContainer");
+                container.innerHTML = "";
+                
+                if (data.perspectives && data.perspectives.length > 0) {
+                    data.perspectives.forEach(article => {
+                        const articleDiv = document.createElement("div");
+                        articleDiv.classList.add("article-box");
+                        
+                        // Format the published date properly
+                        let publishedDate = "Date not available";
+                        if (article.published_at) {
+                            try {
+                                // Try to parse as ISO date first
+                                if (article.published_at.includes('T')) {
+                                    const dateObj = new Date(article.published_at);
+                                    publishedDate = dateObj.toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
+                                } 
+                                // Fallback to raw string if not ISO format
+                                else {
+                                    publishedDate = article.published_at;
+                                }
+                            } catch (e) {
+                                publishedDate = article.published_at;
+                            }
+                        }
+                        
+                        articleDiv.innerHTML = `
+                            <h3>${article.title || "No title available"}</h3>
+                            <p><strong><i class="fas fa-newspaper"></i> Source:</strong> ${article.source || "Unknown source"}</p>
+                            <p><strong><i class="fas fa-calendar-alt"></i> Published:</strong> ${article.published_at}</p>
+                            <p><strong><i class="fas fa-percentage"></i> Relevance:</strong> ${article.bias_score || "N/A"}%</p>
+                            
+                            <div class="article-content">
+                                <p><strong>Content Preview:</strong></p>
+                                <p>${article.content ? article.content.substring(0, 300) + (article.content.length > 300 ? "..." : "") : "No content available"}</p>
+                            </div>
+                            
+                            <div class="unbiased-version">
+                                <p><strong>Unbiased Version:</strong></p>
+                                <p>${article.unbiased_version || "No summary available"}</p>
+                            </div>
+                            
+                            ${article.url ? `<a href="${article.url}" target="_blank" style="display: inline-block; margin-top: 15px; color: var(--button-bg); text-decoration: none;">
+                                <i class="fas fa-external-link-alt"></i> Read full article
+                            </a>` : ''}
+                        `;
+                        container.appendChild(articleDiv);
+                    });
+                } else {
+                    container.innerHTML = `<div style="text-align: center; padding: 20px; color: #aaa;">
+                        <i class="fas fa-info-circle" style="font-size: 24px;"></i>
+                        <p>No additional perspectives found for this story</p>
+                    </div>`;
+                }
+            })
+            .catch(error => {
+                loadingDiv.style.display = "none";
+                analyzeButton.disabled = false;
+                analyzeButton.innerHTML = `<i class="fas fa-search"></i> Analyze News`;
+                resultDiv.style.display = "block";
+                resultDiv.innerHTML = `<div style="text-align: center; color: #ff6b6b; padding: 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 24px;"></i>
+                    <h3>Error Processing Request</h3>
+                    <p>${error.message || "Please try again later"}</p>
+                    <button onclick="window.location.reload()" style="margin-top: 10px; background: var(--button-bg); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-sync-alt"></i> Try Again
+                    </button>
                 </div>`;
+                console.error("Error:", error);
+            });
+        });
+
+        // Helper function to validate URLs
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;  
+            }
         }
-
-        // Animate results
-        resultDiv.style.animation = "slideUp 0.5s ease-out";
-    })
-    .catch(error => {
-        loadingDiv.style.display = "none";
-        resultDiv.style.display = "block";
-        resultDiv.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle"></i> Error processing request: ${error.message}
-            </div>`;
-        console.error("Error:", error);
-    });
-});
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </script>
 </body>
 </html>
