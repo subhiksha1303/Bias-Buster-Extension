@@ -2,61 +2,375 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bias Buster - Dashboard</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bias Analyzer - Home</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        :root {
+            --primary: #007bff;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --dark: #121212;
+            --darker: #1e1e1e;
+            --light: #f8f9fa;
+            --border-radius: 8px;
+        }
+        
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            text-align: center;
+            background-color: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
         }
+        
         .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #1e1e1e;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 25px;
+            background: var(--darker);
             border-radius: 12px;
-            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
         }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .user-info {
+            font-size: 14px;
+            color: var(--secondary);
+        }
+        
         .nav-buttons {
             display: flex;
-            justify-content: center;
             gap: 15px;
-            margin-top: 30px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
+        
         .nav-buttons button {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: #ffffff;
-            padding: 12px 18px;
+            background: linear-gradient(135deg, var(--primary), #0056b3);
+            color: white;
+            padding: 10px 15px;
             border: none;
-            border-radius: 10px;
+            border-radius: var(--border-radius);
             font-weight: bold;
-            font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.6);
+            transition: all 0.3s ease;
         }
+        
         .nav-buttons button:hover {
-            transform: scale(1.08);
-            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+        }
+        
+        .analysis-section {
+            margin: 30px 0;
+        }
+        
+        .analysis-input {
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .analysis-input input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 2px solid #333;
+            border-radius: var(--border-radius);
+            background: #282828;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .analysis-input button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--success), #218838);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #282828;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .results-table th, .results-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        
+        .results-table th {
+            background: #007bff;
+            color: white;
+        }
+        
+        .results-table tr:hover {
+            background: #333;
+        }
+        
+        .score-cell {
+            font-weight: bold;
+        }
+        
+        .high-score {
+            color: #ff6b6b;
+        }
+        
+        .medium-score {
+            color: #feca57;
+        }
+        
+        .low-score {
+            color: #1dd1a1;
+        }
+        
+        .insights-section {
+            background: #282828;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin: 25px 0;
+        }
+        
+        .insights-section h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        
+        .insights-section ul {
+            padding-left: 20px;
+        }
+        
+        .tools-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+        
+        .tool-item {
+            background: #282828;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            flex: 1;
+            min-width: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .trends-section {
+            margin-top: 30px;
+        }
+        
+        .trend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #444;
+        }
+        
+        .trend-bar {
+            height: 10px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            background: var(--primary);
+            color: white;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #0069d9;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 15px;
+            }
+            
+            .analysis-input input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .analysis-input button {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-info {
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="nav-buttons">
-    <button onclick="location.href='/api/dashboard/'">🏠 Dashboard</button>
-    <button onclick="location.href='/'">📊 Analyze</button>
-    <button onclick="location.href='/api/about/'">ℹ️ About</button>
+<div class="container">
+    <div class="header">
+        <h1>BiasBuster <small>News Bias Analyzer</small></h1>
+        <div class="user-info">
+            Welcome back | Last analyzed: 2 hours ago
+        </div>
+    </div>
+    
+    <div class="nav-buttons">
+        <button onclick="location.href='/api/startpage/'"><i class="fas fa-home"></i> Home</button>
+        <button onclick="location.href='/api/dashboard/'"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+        <button onclick="location.href='/'"><i class="fas fa-chart-bar"></i> Analyze</button>
+        <button onclick="location.href='/api/about/'"><i class="fas fa-info-circle"></i> About</button>
+    </div>
+    
+    <div class="analysis-section">
+        <h2><i class="fas fa-chart-pie"></i> Quick Analysis</h2>
+        <div class="analysis-input">
+            <input type="text" placeholder="Enter a news headline or article excerpt..." value="Scientists Must Be">
+            <button onclick="analyzeText()"><i class="fas fa-search"></i> Analyze</button>
+        </div>
+        
+        <h3>Recent Analysis Results</h3>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Score</th>
+                    <th>Flagged Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Political Bias</td>
+                    <td class="score-cell high-score">72%</td>
+                    <td>"establishment", "radical"</td>
+                </tr>
+                <tr>
+                    <td>Emotional Language</td>
+                    <td class="score-cell medium-score">65%</td>
+                    <td>"must be", "dangerous"</td>
+                </tr>
+                <tr>
+                    <td>Geographic Bias</td>
+                    <td class="score-cell low-score">48%</td>
+                    <td>"Western scientists"</td>
+                </tr>
+                <tr>
+                    <td>Gender Representation</td>
+                    <td class="score-cell low-score">34%</td>
+                    <td>Male-dominated sources</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="insights-section">
+        <h3><i class="fas fa-lightbulb"></i> Key Insights from Last Analysis</h3>
+        <ul>
+            <li>Strong political leaning detected (72% confidence)</li>
+            <li>Emotional language may influence reader perception</li>
+            <li>Geographic representation could be more balanced</li>
+            <li>Gender diversity in sources needs improvement</li>
+        </ul>
+    </div>
+    
+    <div class="tools-section">
+        <h3><i class="fas fa-tools"></i> Organization Tools</h3>
+        <div class="tool-item">
+            <h4><i class="far fa-file-pdf"></i> Generate Report</h4>
+            <p>Create a PDF bias analysis report</p>
+        </div>
+        <div class="tool-item">
+            <h4><i class="fas fa-sync-alt"></i> Auto-Scan</h4>
+            <p>Enable weekly automatic scanning</p>
+        </div>
+        <div class="tool-item">
+            <h4><i class="fas fa-share-alt"></i> Share Results</h4>
+            <p>Collaborate with your team</p>
+        </div>
+    </div>
+    
+    <div class="trends-section">
+        <h3><i class="fas fa-chart-line"></i> News Industry Trends</h3>
+        <p>Top Biases Detected This Week:</p>
+        
+        <div class="trend-item">
+            <span>Political affiliation</span>
+            <span>68% avg</span>
+        </div>
+        <div class="trend-bar" style="width: 68%"></div>
+        
+        <div class="trend-item">
+            <span>Socioeconomic framing</span>
+            <span>59% avg</span>
+        </div>
+        <div class="trend-bar" style="width: 59%"></div>
+        
+        <div class="trend-item">
+            <span>Racial/cultural stereotypes</span>
+            <span>52% avg</span>
+        </div>
+        <div class="trend-bar" style="width: 52%"></div>
+        
+        <a href="#" class="btn">View Full Trends Report</a>
+    </div>
 </div>
 
-<div class="container">
-    <h2>📊 Dashboard</h2>
-    <p>Welcome to the Bias Buster Dashboard. Here, you can monitor analyzed news statistics, trends, and other insights.</p>
-</div>
+<script>
+    function analyzeText() {
+        const input = document.querySelector('.analysis-input input');
+        alert(`Analyzing: "${input.value}"\nThis would call the BiasButter API in a real implementation.`);
+        // In a real implementation, this would call your backend API
+        // and update the results table dynamically
+    }
+    
+    // Simulate loading data
+    $(document).ready(function() {
+        // This would be replaced with actual API calls
+        console.log("Dashboard loaded");
+    });
+</script>
 
 </body>
 </html>

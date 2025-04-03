@@ -16,13 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from api.views import home, dashboard, about
+from api.views import home, dashboard, about, startpage
 
 urlpatterns = [
     path("admin/", admin.site.urls),   # Admin panel
     path("", home, name="home"),  
     path('dashboard/', dashboard, name="dashboard"),
     path('about/', about, name="about"),
+    path('startpage/', startpage, name="startpage"),
     path("api/", include("api.urls")), # Include API endpoints from api/urls.py
 ]
 

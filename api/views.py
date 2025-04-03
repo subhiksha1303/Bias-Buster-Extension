@@ -34,6 +34,9 @@ def dashboard(request):
 def about(request):
     return render(request, 'about.html')
 
+def startpage(request):
+    return render(request, 'startpage.html')
+
 def clean_news_content(content):
     """Clean up news content to remove unwanted patterns and formatting"""
     if not content:
